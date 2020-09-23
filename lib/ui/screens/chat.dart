@@ -48,36 +48,16 @@ class _ChatScreenState extends State<ChatScreen> {
               imgUrl: friendsList[0]['imgUrl'],
             ),
             SizedBox(width: 15),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "Cybdom Tech",
-                  style: Theme.of(context).textTheme.subhead,
-                  overflow: TextOverflow.clip,
-                ),
-                Text(
-                  "Online",
-                  style: Theme.of(context).textTheme.subtitle.apply(
-                        color: myGreen,
-                      ),
-                )
-              ],
-            )
+            Text(
+              "Cybdom Tech",
+              style: Theme.of(context).textTheme.subhead,
+              overflow: TextOverflow.clip,
+            ),
           ],
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.phone),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.videocam),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Icon(Icons.more_vert),
+            icon: Icon(Icons.search),
             onPressed: () {},
           ),
         ],
@@ -90,15 +70,103 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(15),
-                    itemCount: messages.length,
+                    itemCount: messages.length+1,
                     itemBuilder: (ctx, i) {
-                      if (messages[i]['status'] == MessageType.received) {
-                        return ReceivedMessagesWidget(i: i);
-                      } else {
-                        return SentMessageWidget(i: i);
+                      if(i == 0){
+                        return Table(
+                          border: TableBorder.all(
+                            color: Colors.black26,
+                            width: 7,
+                            style: BorderStyle.none,
+                          ),
+                          children: [
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  child: Text(
+                                      'Title',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                      'Observation',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                      'Time',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            TableRow(
+                              children: [
+                                SizedBox(
+                                  height: 32,
+                                ),
+                                SizedBox(
+                                  height: 32,
+                                ),
+                                SizedBox(
+                                  height: 32,
+                                ),
+                              ]
+                            )
+                          ],
+                        );
+                      } else{
+                        return Table(
+                          border: TableBorder.all(
+                            color: Colors.black26,
+                            width: 1,
+                            style: BorderStyle.none,
+                          ),
+                          children: [
+                            TableRow(
+                              children: [
+                                TableCell(
+                                  child: Text(
+                                      "title",
+                                    style: TextStyle(
+                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                      messages[i-1]['message'],
+                                    style: TextStyle(
+                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+                                    ),
+                                  ),
+                                ),
+                                TableCell(
+                                  child: Text(
+                                      messages[i-1]['time'],
+                                    style: TextStyle(
+                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
                       }
                     },
-                  ),
+                  )
                 ),
                 Container(
                   margin: EdgeInsets.all(15.0),
@@ -134,11 +202,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                               ),
                               IconButton(
-                                icon: Icon(Icons.photo_camera),
+                                icon: Icon(Icons.format_bold),
                                 onPressed: () {},
                               ),
                               IconButton(
-                                icon: Icon(Icons.attach_file),
+                                icon: Icon(Icons.format_italic),
                                 onPressed: () {},
                               )
                             ],
@@ -152,7 +220,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             color: myGreen, shape: BoxShape.circle),
                         child: InkWell(
                           child: Icon(
-                            Icons.send,
+                            Icons.note_add,
                             color: Colors.white,
                           ),
                           onLongPress: () {
