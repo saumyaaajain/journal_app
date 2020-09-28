@@ -89,17 +89,31 @@ List<Map<String, dynamic>> messages = [
     'contactName' : 'Client',
     'message' : 'Hi mate, I\d like to hire you to create a mobile app for my business' ,
     'time' : '08:43 AM',
-    'size' : 16.0,
+    'style' : {
+      'size' : 16.0,
+      'isBold' : false,
+      'isItalic' : false,
+    }
   },
   {
     'status' : MessageType.sent,
     'message' : 'Hi, I hope you are doing great!' ,
-    'time' : '08:45 AM'
+    'time' : '08:45 AM',
+    'style' : {
+      'size' : 20.1,
+      'isBold' : false,
+      'isItalic' : false,
+    }
   },
   {
     'status' : MessageType.sent,
     'message' : 'Please share with me the details of your project, as well as your time and budgets constraints.' ,
-    'time' : '08:45 AM'
+    'time' : '08:45 AM',
+    'style' : {
+      'size' : 40.0,
+      'isBold' : false,
+      'isItalic' : false,
+    }
   },
   {
     'status' : MessageType.received,
@@ -107,11 +121,22 @@ List<Map<String, dynamic>> messages = [
     'contactName' : 'Client',
     'message' : 'Sure, let me send you a document that explains everything.' ,
     'time' : '08:47 AM',
-    'size' : 12.6,
+    'style' : {
+      'size' : 12.6,
+      'isBold' : false,
+      'isItalic' : false,
+    }
   },
   {
     'status' : MessageType.sent,
     'message' : 'Ok.' ,
-    'time' : '08:45 AM'
+    'time' : '08:45 AM',
+    'style' : {
+      'size' : 27.0,
+      'isBold' : false,
+      'isItalic' : false,
+    }
   },
 ];
+
+

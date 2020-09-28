@@ -1,8 +1,11 @@
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messengerish/global.dart';
 import 'package:messengerish/ui/widgets/widgets.dart';
+import 'package:messengerish/ui/widgets/searchwidget.dart';
+import 'package:messengerish/model/Message.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -11,12 +14,30 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   bool _showBottom = false;
+  bool isBold = false, isItalic = false;
   double _currentSliderValue = 40;
   TextEditingController msg = new TextEditingController();
+  TextEditingController _title = new TextEditingController();
+  TextEditingController _observation = new TextEditingController();
+  CollectionReference db = Firestore.instance.collection('events');
+  Future<List<DocumentSnapshot>> futureData;
 
+  @override
+  void initState() {
+    super.initState();
+    futureData = fetchData();
+  }
+
+  Future<QuerySnapshot> getData(){
+    return db.getDocuments();
+  }
+
+  Future<List<DocumentSnapshot>> fetchData() async {
+    return db.getDocuments().then((value) => value.documents).catchError((e) => print(e));
+  }
 
   void sendMsg(){
-    if(msg.text.length <= 0){
+    if(_title.text.length <= 0 || _observation.text.length <= 0){
       return;
     }
     print("reaching");
@@ -25,22 +46,73 @@ class _ChatScreenState extends State<ChatScreen> {
         'status' : MessageType.received,
         'contactImgUrl' : 'https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_960_720.jpg',
         'contactName' : 'Client',
-        'message' : msg.text,
+        'title' : _title.text,
+        'message' : _observation.text,
         'time' : '08:49 AM',
-        'size' : _currentSliderValue == 0 ? 5 : _currentSliderValue*0.6
+        'style' : {
+          'size' : _currentSliderValue,
+          'isBold' : isBold,
+          'isItalic' : isItalic,
+        }
       });
     });
+//    addUser();
     msg.clear();
-    print(messages[messages.length-1]);
+    _title.clear();
+    _observation.clear();
+    setState(() {
+      isBold = false;
+      isItalic = false;
+      _currentSliderValue = 40;
+    });
+  }
+
+  Widget bodyContent(){
+    Padding(
+      padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
+      child: ListTile(
+//                        leading: Icon(Icons.assignment),
+        title: Text(
+          messages[i]['title'] != null ? messages[i]['title'] : "Title",
+          style: TextStyle(
+              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
+              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
+          ),
+        ),
+        subtitle: Text(
+          messages[i]['message'],
+          style: TextStyle(
+              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
+              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
+          ),
+        ),
+        trailing: Column(
+          children: <Widget>[
+            Icon(
+              Icons.calendar_today,
+//                              color: Colors.white,
+            ),
+            Text(
+              messages[i]['time'],
+              style: TextStyle(
+//                                fontSize: messages[i]['size'] == null ? 20 : messages[i]['size'],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+//      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        iconTheme: IconThemeData(color: Colors.black54),
+//        backgroundColor: Colors.blueGrey,
+//        iconTheme: IconThemeData(color: Colors.white),
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
@@ -49,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             SizedBox(width: 15),
             Text(
-              "Cybdom Tech",
+              "My Experiment-1",
               style: Theme.of(context).textTheme.subhead,
               overflow: TextOverflow.clip,
             ),
@@ -57,8 +129,143 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              showModalBottomSheet<void>(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(32), topRight: Radius.circular(32)),
+                ),
+                context: context,
+                builder: (BuildContext context) {
+                  return Container(
+                      height: 12200,
+                      width: 500,
+//                    color: Colors.black12,
+                      child:  StatefulBuilder(
+                        builder: (context, state) => Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only( bottom: 15),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    Icon(
+                                        Icons.note_add,
+                                      size: 32,
+                                      color: Colors.blue,
+                                    ),
+                                    Text(
+                                      "Add an observation",
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                          fontSize: 35
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  style: TextStyle(
+                                      fontSize: _currentSliderValue,
+                                    fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                                    fontStyle: isItalic ? FontStyle.italic : FontStyle.normal
+                                  ),
+                                  controller: _title,
+//                              maxLines: 4,
+                                  decoration: InputDecoration(
+                                    hintText: "Title of observation",
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  style: TextStyle(
+                                      fontSize: _currentSliderValue,
+                                      fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                                      fontStyle: isItalic ? FontStyle.italic : FontStyle.normal
+                                  ),
+                                  controller: _observation,
+//                              maxLines: 10,
+                                  decoration: InputDecoration(
+                                    hintText: "Observation",
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 250,
+                                    child: Slider(
+                                      value: _currentSliderValue,
+                                      min: 20,
+                                      max: 60,
+                                      divisions: 8,
+                                      label: _currentSliderValue.round().toString(),
+                                      onChanged: (double value) {
+                                        print(value);
+                                        state(() {
+                                          _currentSliderValue = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  IconButton(
+                                    color: isBold ? Colors.blue : Colors.black26,
+                                    icon: Icon(Icons.format_bold),
+                                    onPressed: (){
+                                      state(() {
+                                        isBold = !isBold;
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    color: isItalic ? Colors.blue : Colors.black26,
+                                    icon: Icon(Icons.format_italic),
+                                    onPressed: (){
+                                      state(() {
+                                        isItalic = !isItalic;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              FlatButton(
+                                textColor: Colors.blue,
+//                                color: Colors.blue,
+                                child: Text(
+                                    "Submit",
+                                  style: TextStyle(
+                                    fontSize: 27
+                                  ),
+                                ),
+                                onPressed: (){
+                                  sendMsg();
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                  );
+                },
+              );
+            },
+          ),
+          IconButton(
             icon: Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () {
+              showSearch(context: context, delegate: Search("hello"));
+            },
           ),
         ],
       ),
@@ -69,102 +276,138 @@ class _ChatScreenState extends State<ChatScreen> {
               children: <Widget>[
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(15),
-                    itemCount: messages.length+1,
+                    padding: const EdgeInsets.all(5),
+                    itemCount: messages.length,
                     itemBuilder: (ctx, i) {
-                      if(i == 0){
-                        return Table(
-                          border: TableBorder.all(
-                            color: Colors.black26,
-                            width: 7,
-                            style: BorderStyle.none,
-                          ),
-                          children: [
-                            TableRow(
-                              children: [
-                                TableCell(
-                                  child: Text(
-                                      'Title',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  child: Text(
-                                      'Observation',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  child: Text(
-                                      'Time',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+//                      if(i == 0){
+//                        return Table(
+//                          border: TableBorder.all(
+//                            color: Colors.black26,
+//                            width: 7,
+//                            style: BorderStyle.none,
+//                          ),
+//                          children: [
+//                            TableRow(
+//                              children: [
+//                                TableCell(
+//                                  child: Text(
+//                                      'Title',
+//                                    style: TextStyle(
+//                                      fontSize: 22,
+//                                      fontWeight: FontWeight.bold,
+//                                    ),
+//                                  ),
+//                                ),
+//                                TableCell(
+//                                  child: Text(
+//                                      'Observation',
+//                                    style: TextStyle(
+//                                      fontSize: 22,
+//                                      fontWeight: FontWeight.bold,
+//                                    ),
+//                                  ),
+//                                ),
+//                                TableCell(
+//                                  child: Text(
+//                                      'Time',
+//                                    style: TextStyle(
+//                                      fontSize: 22,
+//                                      fontWeight: FontWeight.bold,
+//                                    ),
+//                                  ),
+//                                ),
+//                              ],
+//                            ),
+//                            TableRow(
+//                              children: [
+//                                SizedBox(
+//                                  height: 32,
+//                                ),
+//                                SizedBox(
+//                                  height: 32,
+//                                ),
+//                                SizedBox(
+//                                  height: 32,
+//                                ),
+//                              ]
+//                            )
+//                          ],
+//                        );
+//                      } else{
+//                        return Table(
+//                          border: TableBorder.all(
+//                            color: Colors.black26,
+//                            width: 1,
+//                            style: BorderStyle.none,
+//                          ),
+//                          children: [
+//                            TableRow(
+//                              children: [
+//                                TableCell(
+//                                  child: Text(
+//                                      "title",
+//                                    style: TextStyle(
+//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+//                                    ),
+//                                  ),
+//                                ),
+//                                TableCell(
+//                                  child: Text(
+//                                      messages[i-1]['message'],
+//                                    style: TextStyle(
+//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+//                                    ),
+//                                  ),
+//                                ),
+//                                TableCell(
+//                                  child: Text(
+//                                      messages[i-1]['time'],
+//                                    style: TextStyle(
+//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
+//                                    ),
+//                                  ),
+//                                ),
+//                              ],
+//                            ),
+//                          ],
+//                        );
+//                      }
+                      return Padding(
+                        padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
+                        child: ListTile(
+//                        leading: Icon(Icons.assignment),
+                          title: Text(
+                            messages[i]['title'] != null ? messages[i]['title'] : "Title",
+                            style: TextStyle(
+                              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
+                              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+                              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
                             ),
-                            TableRow(
-                              children: [
-                                SizedBox(
-                                  height: 32,
-                                ),
-                                SizedBox(
-                                  height: 32,
-                                ),
-                                SizedBox(
-                                  height: 32,
-                                ),
-                              ]
-                            )
-                          ],
-                        );
-                      } else{
-                        return Table(
-                          border: TableBorder.all(
-                            color: Colors.black26,
-                            width: 1,
-                            style: BorderStyle.none,
                           ),
-                          children: [
-                            TableRow(
-                              children: [
-                                TableCell(
-                                  child: Text(
-                                      "title",
-                                    style: TextStyle(
-                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  child: Text(
-                                      messages[i-1]['message'],
-                                    style: TextStyle(
-                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-                                    ),
-                                  ),
-                                ),
-                                TableCell(
-                                  child: Text(
-                                      messages[i-1]['time'],
-                                    style: TextStyle(
-                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          subtitle: Text(
+                            messages[i]['message'],
+                            style: TextStyle(
+                              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
+                                fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+                                fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
                             ),
-                          ],
-                        );
-                      }
+                          ),
+                          trailing: Column(
+                            children: <Widget>[
+                              Icon(
+                                Icons.calendar_today,
+//                              color: Colors.white,
+                              ),
+                              Text(
+                                messages[i]['time'],
+                                style: TextStyle(
+//                                fontSize: messages[i]['size'] == null ? 20 : messages[i]['size'],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
                     },
                   )
                 ),
@@ -172,64 +415,90 @@ class _ChatScreenState extends State<ChatScreen> {
                   margin: EdgeInsets.all(15.0),
                   height: 61,
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(35.0),
-                            boxShadow: [
-                              BoxShadow(
-                                  offset: Offset(0, 3),
-                                  blurRadius: 5,
-                                  color: Colors.grey)
-                            ],
-                          ),
-                          child: Row(
-                            children: <Widget>[
-                              IconButton(
-                                  icon: Icon(Icons.keyboard), onPressed: () {}),
-                              Expanded(
-                                child: TextField(
-                                  style: TextStyle(
-                                    fontSize: _currentSliderValue == 0 ? 5 : _currentSliderValue*0.6,
-                                  ),
-                                  decoration: InputDecoration(
-                                      hintText: "Type Something...",
-                                      border: InputBorder.none,
-                                  ),
-                                  controller: msg,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.format_bold),
-                                onPressed: () {},
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.format_italic),
-                                onPressed: () {},
-                              )
-                            ],
-                          ),
-                        ),
+//                      Expanded(
+//                        child: Container(
+//                          decoration: BoxDecoration(
+//                            color: Colors.white,
+//                            borderRadius: BorderRadius.circular(35.0),
+//                            boxShadow: [
+//                              BoxShadow(
+//                                  offset: Offset(0, 3),
+//                                  blurRadius: 5,
+//                                  color: Colors.grey)
+//                            ],
+//                          ),
+//                          child: Row(
+//                            children: <Widget>[
+//                              IconButton(
+//                                  icon: Icon(Icons.keyboard), onPressed: () {}),
+//                              Expanded(
+//                                child: TextField(
+//                                  style: TextStyle(
+//                                    fontSize: _currentSliderValue == 0 ? 5 : _currentSliderValue*0.6,
+//                                  ),
+//                                  decoration: InputDecoration(
+//                                      hintText: "Type Something...",
+//                                      border: InputBorder.none,
+//                                  ),
+//                                  controller: msg,
+//                                ),
+//                              ),
+//                              IconButton(
+//                                icon: Icon(Icons.format_bold),
+//                                onPressed: () {},
+//                              ),
+//                              IconButton(
+//                                icon: Icon(Icons.format_italic),
+//                                onPressed: () {},
+//                              )
+//                            ],
+//                          ),
+//                        ),
+//                      ),
+//                      SizedBox(width: 15),
+//                      Container(
+//                        padding: const EdgeInsets.all(15.0),
+//                        decoration: BoxDecoration(
+//                            color: myGreen, shape: BoxShape.circle),
+//                        child: InkWell(
+//                          child: Icon(
+//                            Icons.note_add,
+//                            color: Colors.white,
+//                          ),
+//                          onLongPress: () {
+//                            setState(() {
+//                              _showBottom = true;
+//                            });
+//                          },
+//                        ),
+//                      ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_left),
+                        color: Colors.blueAccent,
+                        onPressed: (){},
                       ),
-                      SizedBox(width: 15),
-                      Container(
-                        padding: const EdgeInsets.all(15.0),
-                        decoration: BoxDecoration(
-                            color: myGreen, shape: BoxShape.circle),
-                        child: InkWell(
-                          child: Icon(
-                            Icons.note_add,
-                            color: Colors.white,
-                          ),
-                          onLongPress: () {
-                            setState(() {
-                              _showBottom = true;
-                            });
-                          },
-                        ),
-                      )
+                      IconButton(
+                        icon: Icon(Icons.filter_1),
+                        color: Colors.blueAccent,
+                        onPressed: (){},
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.filter_2),
+                        color: Colors.blueAccent,
+                        onPressed: (){},
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.filter_3),
+                        color: Colors.blueAccent,
+                        onPressed: (){},
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.arrow_right),
+                        color: Colors.blueAccent,
+                        onPressed: (){},
+                      ),
                     ],
                   ),
                 )
@@ -251,46 +520,46 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _showBottom
-              ? Positioned(
-                  bottom: 90,
-//                  left: ,
-                  right: 20,
-                  child: Container(
-                    padding: EdgeInsets.all(25.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(32)),
-                      boxShadow: [
-                        BoxShadow(
-                            offset: Offset(0, 5),
-                            blurRadius: 15.0,
-                            color: Colors.grey)
-                      ],
-                    ),
-                    child: RotatedBox(
-                      quarterTurns: 1,
-                      child: Slider(
-                        value: _currentSliderValue,
-                        min: 0,
-                        max: 100,
-                        divisions: 5,
-                        label: _currentSliderValue.round().toString(),
-                        onChangeEnd: (double value){
-                          setState(() {
-                            _showBottom = false;
-                          });
-                        },
-                        onChanged: (double value) {
-                          setState(() {
-                            _currentSliderValue = value;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                )
-              : Container(),
+//          _showBottom
+//              ? Positioned(
+//                  bottom: 90,
+////                  left: ,
+//                  right: 20,
+//                  child: Container(
+//                    padding: EdgeInsets.all(25.0),
+//                    decoration: BoxDecoration(
+//                      color: Colors.white,
+//                      borderRadius: BorderRadius.all(Radius.circular(32)),
+//                      boxShadow: [
+//                        BoxShadow(
+//                            offset: Offset(0, 5),
+//                            blurRadius: 15.0,
+//                            color: Colors.grey)
+//                      ],
+//                    ),
+//                    child: RotatedBox(
+//                      quarterTurns: 1,
+//                      child: Slider(
+//                        value: _currentSliderValue,
+//                        min: 0,
+//                        max: 100,
+//                        divisions: 5,
+//                        label: _currentSliderValue.round().toString(),
+//                        onChangeEnd: (double value){
+//                          setState(() {
+//                            _showBottom = false;
+//                          });
+//                        },
+//                        onChanged: (double value) {
+//                          setState(() {
+//                            _currentSliderValue = value;
+//                          });
+//                        },
+//                      ),
+//                    ),
+//                  ),
+//                )
+//              : Container(),
         ],
       ),
     );

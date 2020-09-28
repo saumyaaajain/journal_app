@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:messengerish/ui/screens/SplashScreen.dart';
 import 'package:messengerish/ui/screens/screens.dart';
 
 void main() => runApp(MyApp());
@@ -8,13 +9,29 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: ChatScreen(), //HomeScreen(),
+      title: 'My Journal',
+//      theme: ThemeData(
+//        primarySwatch: Colors.blue,
+//        textTheme: TextTheme(
+//          bodyText1: TextStyle(),
+//          bodyText2: TextStyle(),
+////          title: TextStyle(),
+////          subtitle: TextStyle(),
+//          subtitle1: TextStyle(),
+//          subtitle2: TextStyle(),
+//          caption: TextStyle(),
+//        ).apply(
+//          bodyColor: Colors.white,
+//          displayColor: Colors.white,
+//        ),
+//        iconTheme: IconThemeData(
+//          color: Colors.green
+//        ),
+//      ),
+      home: SplashScreen(), //HomeScreen(),
       routes: {
         'chat': (ctx) => ChatScreen(),
+        'home': (ctx) => HomeScreen(),
       },
     );
   }

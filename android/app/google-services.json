@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "6024385146",
+    "firebase_url": "https://pruooo.firebaseio.com",
+    "project_id": "pruooo",
+    "storage_bucket": "pruooo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:6024385146:android:5cc1421a15a8e5b6fb21c3",
+        "android_client_info": {
+          "package_name": "com.example.messengerish"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "6024385146-oq82uk8f5m5g0sdj4mikbn7jlrt8cmur.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq2f6KqBPpSnjmFQ1B9X8HPJEDnNSKtIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "6024385146-oq82uk8f5m5g0sdj4mikbn7jlrt8cmur.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
