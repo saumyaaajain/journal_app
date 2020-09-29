@@ -1,3 +1,4 @@
+//import 'dart:html';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,22 +20,24 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController msg = new TextEditingController();
   TextEditingController _title = new TextEditingController();
   TextEditingController _observation = new TextEditingController();
-  CollectionReference db = Firestore.instance.collection('events');
+  CollectionReference db = Firestore.instance.collection('journal');
   Future<List<DocumentSnapshot>> futureData;
+  int pageNo = 1;
+  DocumentSnapshot lastVisible;
 
   @override
   void initState() {
     super.initState();
-    futureData = fetchData();
+//    futureData = fetchData();
   }
 
   Future<QuerySnapshot> getData(){
     return db.getDocuments();
   }
-
-  Future<List<DocumentSnapshot>> fetchData() async {
-    return db.getDocuments().then((value) => value.documents).catchError((e) => print(e));
-  }
+//
+//  Future<List<dynamic>> fetchData() async {
+//    return db;
+//  }
 
   void sendMsg(){
     if(_title.text.length <= 0 || _observation.text.length <= 0){
@@ -67,25 +70,25 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Widget bodyContent(){
-    Padding(
+  Widget bodyContent(dynamic messages){
+    return Padding(
       padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
       child: ListTile(
 //                        leading: Icon(Icons.assignment),
         title: Text(
-          messages[i]['title'] != null ? messages[i]['title'] : "Title",
+          messages['title'] != null ? messages['title'] : "Title",
           style: TextStyle(
-              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
-              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
-              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
+              fontSize: messages['style']['size'] == null ? 20 : messages['style']['size'],
+              fontWeight: messages['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+              fontStyle: messages['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
           ),
         ),
         subtitle: Text(
-          messages[i]['message'],
+          messages['message'],
           style: TextStyle(
-              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
-              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
-              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
+              fontSize: messages['style']['size'] == null ? 20 : messages['style']['size'],
+              fontWeight: messages['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
+              fontStyle: messages['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
           ),
         ),
         trailing: Column(
@@ -95,7 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
 //                              color: Colors.white,
             ),
             Text(
-              messages[i]['time'],
+              messages['time'],
               style: TextStyle(
 //                                fontSize: messages[i]['size'] == null ? 20 : messages[i]['size'],
               ),
@@ -275,141 +278,25 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Column(
               children: <Widget>[
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(5),
-                    itemCount: messages.length,
-                    itemBuilder: (ctx, i) {
-//                      if(i == 0){
-//                        return Table(
-//                          border: TableBorder.all(
-//                            color: Colors.black26,
-//                            width: 7,
-//                            style: BorderStyle.none,
-//                          ),
-//                          children: [
-//                            TableRow(
-//                              children: [
-//                                TableCell(
-//                                  child: Text(
-//                                      'Title',
-//                                    style: TextStyle(
-//                                      fontSize: 22,
-//                                      fontWeight: FontWeight.bold,
-//                                    ),
-//                                  ),
-//                                ),
-//                                TableCell(
-//                                  child: Text(
-//                                      'Observation',
-//                                    style: TextStyle(
-//                                      fontSize: 22,
-//                                      fontWeight: FontWeight.bold,
-//                                    ),
-//                                  ),
-//                                ),
-//                                TableCell(
-//                                  child: Text(
-//                                      'Time',
-//                                    style: TextStyle(
-//                                      fontSize: 22,
-//                                      fontWeight: FontWeight.bold,
-//                                    ),
-//                                  ),
-//                                ),
-//                              ],
-//                            ),
-//                            TableRow(
-//                              children: [
-//                                SizedBox(
-//                                  height: 32,
-//                                ),
-//                                SizedBox(
-//                                  height: 32,
-//                                ),
-//                                SizedBox(
-//                                  height: 32,
-//                                ),
-//                              ]
-//                            )
-//                          ],
-//                        );
-//                      } else{
-//                        return Table(
-//                          border: TableBorder.all(
-//                            color: Colors.black26,
-//                            width: 1,
-//                            style: BorderStyle.none,
-//                          ),
-//                          children: [
-//                            TableRow(
-//                              children: [
-//                                TableCell(
-//                                  child: Text(
-//                                      "title",
-//                                    style: TextStyle(
-//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-//                                    ),
-//                                  ),
-//                                ),
-//                                TableCell(
-//                                  child: Text(
-//                                      messages[i-1]['message'],
-//                                    style: TextStyle(
-//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-//                                    ),
-//                                  ),
-//                                ),
-//                                TableCell(
-//                                  child: Text(
-//                                      messages[i-1]['time'],
-//                                    style: TextStyle(
-//                                      fontSize: messages[i-1]['size'] == null ? 20 : messages[i-1]['size'],
-//                                    ),
-//                                  ),
-//                                ),
-//                              ],
-//                            ),
-//                          ],
-//                        );
-//                      }
-                      return Padding(
-                        padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
-                        child: ListTile(
-//                        leading: Icon(Icons.assignment),
-                          title: Text(
-                            messages[i]['title'] != null ? messages[i]['title'] : "Title",
-                            style: TextStyle(
-                              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
-                              fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
-                              fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
-                            ),
-                          ),
-                          subtitle: Text(
-                            messages[i]['message'],
-                            style: TextStyle(
-                              fontSize: messages[i]['style']['size'] == null ? 20 : messages[i]['style']['size'],
-                                fontWeight: messages[i]['style']['isBold'] ? FontWeight.bold : FontWeight.normal,
-                                fontStyle: messages[i]['style']['isItalic'] ? FontStyle.italic : FontStyle.normal
-                            ),
-                          ),
-                          trailing: Column(
-                            children: <Widget>[
-                              Icon(
-                                Icons.calendar_today,
-//                              color: Colors.white,
-                              ),
-                              Text(
-                                messages[i]['time'],
-                                style: TextStyle(
-//                                fontSize: messages[i]['size'] == null ? 20 : messages[i]['size'],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                  child: StreamBuilder(
+                    stream: pageNo == 1 ? db.limit(1).snapshots() : db.startAfterDocument(lastVisible).limit(1).snapshots(),
+                    builder: (context, snapshot){
+                      if(snapshot.hasData){
+                            () async {
+                              setState(() {
+                              lastVisible = snapshot.data.documents[snapshot.data.documents.length-1];
+                              });
+                            }();
+                        print(snapshot.data.documents[snapshot.data.documents.length-1]);
+                        return ListView.builder(
+                          itemCount: snapshot.data.documents.length,
+                            itemBuilder: (context, i){
+                              return bodyContent(snapshot.data.documents[i]);
+                        });
+                      }
+                      return Text("Loading");
                     },
-                  )
+                  ),
                 ),
                 Container(
                   margin: EdgeInsets.all(15.0),
@@ -477,27 +364,29 @@ class _ChatScreenState extends State<ChatScreen> {
                       IconButton(
                         icon: Icon(Icons.arrow_left),
                         color: Colors.blueAccent,
-                        onPressed: (){},
+                        onPressed: (){
+                          if(pageNo == 1){
+                            return;
+                          }
+                          setState(() {
+                            pageNo -= 1;
+                          });
+                        },
                       ),
-                      IconButton(
-                        icon: Icon(Icons.filter_1),
-                        color: Colors.blueAccent,
-                        onPressed: (){},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.filter_2),
-                        color: Colors.blueAccent,
-                        onPressed: (){},
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.filter_3),
-                        color: Colors.blueAccent,
-                        onPressed: (){},
+                      Text(
+                        pageNo.toString(),
+                        style: TextStyle(
+                            color: Colors.blue
+                        ),
                       ),
                       IconButton(
                         icon: Icon(Icons.arrow_right),
                         color: Colors.blueAccent,
-                        onPressed: (){},
+                        onPressed: (){
+                          setState(() {
+                            pageNo += 1;
+                          });
+                        },
                       ),
                     ],
                   ),
@@ -505,21 +394,21 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
             ),
           ),
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () {
-                  sendMsg();
+//          Positioned.fill(
+//            child: GestureDetector(
+//              onTap: () {
+//                  sendMsg();
+////                setState(() {
+////                  _showBottom = false;
+////                });
+//              },
+//              onLongPress: (){
 //                setState(() {
-//                  _showBottom = false;
+//                  _showBottom = true;
 //                });
-              },
-              onLongPress: (){
-                setState(() {
-                  _showBottom = true;
-                });
-              },
-            ),
-          ),
+//              },
+//            ),
+//          ),
 //          _showBottom
 //              ? Positioned(
 //                  bottom: 90,
