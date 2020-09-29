@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:messengerish/controller/Message.dart';
-import 'package:messengerish/model/Message.dart' as MessageModel;
 
 
 class SplashScreen extends StatefulWidget {
@@ -26,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
   void getData(){
-    List<MessageModel.Message> msg = [];
+//    List<MessageModel.Message> msg = [];
     Message().getData().then((value) => {
 //      print(value.documents.length),
 //      value.documents.forEach((doc) => msg.add(MessageModel.Message(doc.data))),

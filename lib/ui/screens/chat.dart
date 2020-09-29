@@ -7,8 +7,8 @@ import 'package:messengerish/global.dart';
 import 'package:messengerish/ui/widgets/widgets.dart';
 import 'package:messengerish/ui/widgets/searchwidget.dart';
 import 'package:messengerish/bloc/ObservationBloc.dart';
-import 'package:messengerish/model/Message.dart';
 import 'package:messengerish/helper/Crud.dart';
+import 'package:messengerish/helper/Helper.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -16,7 +16,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  bool _showBottom = false;
   bool isBold = false, isItalic = false;
   double _currentSliderValue = 40;
   TextEditingController msg = new TextEditingController();
@@ -83,19 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget bodyContent(dynamic messages){
-    DateTime time = DateTime.parse(messages['time'].toDate().toString());
-    String timeStr;
-    if(time.hour > 12){
-      String hours = (time.hour-12).toString();
-      String mins = time.minute.toString();
-      timeStr = hours+":"+mins+" PM";
-    } else if(time.hour == 12){
-      timeStr = "12:"+time.minute.toString()+" PM";
-    }else if(time.hour == 0){
-      timeStr = "12:"+time.minute.toString()+" AM";
-    } else{
-      timeStr = time.hour.toString()+":"+time.minute.toString()+" AM";
-    }
+    String time = Helper().getTime(messages['time']);
     return Padding(
       padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
       child: ListTile(
@@ -123,7 +110,7 @@ class _ChatScreenState extends State<ChatScreen> {
 //                              color: Colors.white,
             ),
             Text(
-              timeStr,
+              time,
               style: TextStyle(
 //                fontSize: messages['size'] == null ? 20 : messages['size'],
               ),
@@ -297,191 +284,26 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                  child: StreamBuilder<List<DocumentSnapshot>>(
-                    stream: observationBloc.observationStream,
-                    builder: (context, snapshot){
-                      if(snapshot.hasData){
-                        print(snapshot.data[snapshot.data.length-1]);
-                        return ListView.builder(
-                          itemCount: snapshot.data.length,
-                            shrinkWrap: true,
-                            controller: controller,
-                            itemBuilder: (context, i){
-                              return bodyContent(snapshot.data[i]);
-                        });
-                      }
-                      return CircularProgressIndicator();
-                    },
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.all(15.0),
-                  height: 61,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-//                      Expanded(
-//                        child: Container(
-//                          decoration: BoxDecoration(
-//                            color: Colors.white,
-//                            borderRadius: BorderRadius.circular(35.0),
-//                            boxShadow: [
-//                              BoxShadow(
-//                                  offset: Offset(0, 3),
-//                                  blurRadius: 5,
-//                                  color: Colors.grey)
-//                            ],
-//                          ),
-//                          child: Row(
-//                            children: <Widget>[
-//                              IconButton(
-//                                  icon: Icon(Icons.keyboard), onPressed: () {}),
-//                              Expanded(
-//                                child: TextField(
-//                                  style: TextStyle(
-//                                    fontSize: _currentSliderValue == 0 ? 5 : _currentSliderValue*0.6,
-//                                  ),
-//                                  decoration: InputDecoration(
-//                                      hintText: "Type Something...",
-//                                      border: InputBorder.none,
-//                                  ),
-//                                  controller: msg,
-//                                ),
-//                              ),
-//                              IconButton(
-//                                icon: Icon(Icons.format_bold),
-//                                onPressed: () {},
-//                              ),
-//                              IconButton(
-//                                icon: Icon(Icons.format_italic),
-//                                onPressed: () {},
-//                              )
-//                            ],
-//                          ),
-//                        ),
-//                      ),
-//                      SizedBox(width: 15),
-//                      Container(
-//                        padding: const EdgeInsets.all(15.0),
-//                        decoration: BoxDecoration(
-//                            color: myGreen, shape: BoxShape.circle),
-//                        child: InkWell(
-//                          child: Icon(
-//                            Icons.note_add,
-//                            color: Colors.white,
-//                          ),
-//                          onLongPress: () {
-//                            setState(() {
-//                              _showBottom = true;
-//                            });
-//                          },
-//                        ),
-//                      ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_left),
-                        color: Colors.blueAccent,
-                        onPressed: (){
-                          if(pageNo == 1){
-                            return;
-                          }
-                          setState(() {
-                            pageNo -= 1;
-                          });
-                        },
-                      ),
-                      Text(
-                        pageNo.toString(),
-                        style: TextStyle(
-                            color: Colors.blue
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.arrow_right),
-                        color: Colors.blueAccent,
-                        onPressed: (){
-                          setState(() {
-                            pageNo += 1;
-                            observationBloc.fetchNextMovies();
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                )
-              ],
+      body: StreamBuilder<List<DocumentSnapshot>>(
+        stream: observationBloc.observationStream,
+        builder: (context, snapshot){
+          if(snapshot.hasData){
+            print(snapshot.data[snapshot.data.length-1]);
+            return ListView.builder(
+                itemCount: snapshot.data.length,
+                shrinkWrap: true,
+                controller: controller,
+                itemBuilder: (context, i){
+                  return bodyContent(snapshot.data[i]);
+                });
+          }
+          return Center(
+            child: Container(
+              child: CircularProgressIndicator(),
             ),
-          ),
-//          Positioned.fill(
-//            child: GestureDetector(
-//              onTap: () {
-//                  sendMsg();
-////                setState(() {
-////                  _showBottom = false;
-////                });
-//              },
-//              onLongPress: (){
-//                setState(() {
-//                  _showBottom = true;
-//                });
-//              },
-//            ),
-//          ),
-//          _showBottom
-//              ? Positioned(
-//                  bottom: 90,
-////                  left: ,
-//                  right: 20,
-//                  child: Container(
-//                    padding: EdgeInsets.all(25.0),
-//                    decoration: BoxDecoration(
-//                      color: Colors.white,
-//                      borderRadius: BorderRadius.all(Radius.circular(32)),
-//                      boxShadow: [
-//                        BoxShadow(
-//                            offset: Offset(0, 5),
-//                            blurRadius: 15.0,
-//                            color: Colors.grey)
-//                      ],
-//                    ),
-//                    child: RotatedBox(
-//                      quarterTurns: 1,
-//                      child: Slider(
-//                        value: _currentSliderValue,
-//                        min: 0,
-//                        max: 100,
-//                        divisions: 5,
-//                        label: _currentSliderValue.round().toString(),
-//                        onChangeEnd: (double value){
-//                          setState(() {
-//                            _showBottom = false;
-//                          });
-//                        },
-//                        onChanged: (double value) {
-//                          setState(() {
-//                            _currentSliderValue = value;
-//                          });
-//                        },
-//                      ),
-//                    ),
-//                  ),
-//                )
-//              : Container(),
-        ],
+          );
+        },
       ),
     );
   }
 }
-
-List<IconData> icons = [
-  Icons.image,
-  Icons.camera,
-  Icons.file_upload,
-  Icons.folder,
-  Icons.gif
-];

@@ -2,8 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:messengerish/global.dart';
-import 'package:messengerish/ui/widgets/widgets.dart';
+import 'package:messengerish/helper/Helper.dart';
 
 class Search extends SearchDelegate<Map<String, dynamic>>{
   List<DocumentSnapshot> mes;
@@ -75,32 +74,7 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
     return false;
   }
 
-  String getTime(Timestamp t){
-    DateTime time = DateTime.parse(t.toDate().toString());
-    String timeStr;
-    if(time.hour > 12){
-      String hours = (time.hour-12).toString();
-      String mins = time.minute.toString();
-      timeStr = hours+":"+mins+" PM";
-    } else if(time.hour == 12){
-      timeStr = "12:"+time.minute.toString()+" PM";
-    }else if(time.hour == 0){
-      timeStr = "12:"+time.minute.toString()+" AM";
-    } else{
-      timeStr = time.hour.toString()+":"+time.minute.toString()+" AM";
-    }
-    return timeStr;
-  }
-
-  Widget Observation(){
-//    final Map<String, dynamic> res = getSggestions();
-//    final String title = res['title'] == null
-//        ? "Title"
-//        : res['title'];
-//    final String msg = res['message'] == null
-//        ? "Observation"
-//        : res['message'];
-//    print(title+" "+ msg);
+  Widget observation(){
     return Center(
 //      width: 200,
       child: Card(
@@ -169,7 +143,7 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
 
   @override
   Widget buildResults(BuildContext context) {
-    return   Observation();
+    return   observation();
   }
 
   @override
@@ -206,7 +180,7 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
                     children: highlightOccurrences(suggestions[i]['message'] , query),
                   ),
                 ),
-                trailing: Text(suggestions[i]['time'] == null ? "WHY??": getTime(suggestions[i]['time'])),
+                trailing: Text(suggestions[i]['time'] == null ? "WHY??": Helper().getTime(suggestions[i]['time'])),
               );
             },
           );

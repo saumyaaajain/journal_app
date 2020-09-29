@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:messengerish/ui/screens/Login.dart';
 import 'package:messengerish/ui/screens/SplashScreen.dart';
 import 'package:messengerish/ui/screens/screens.dart';
 
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
 //      ),
       home: SplashScreen(), //HomeScreen(),
       routes: {
+        'login': (cxt) => LoginPage(),
         'chat': (ctx) => ChatScreen(),
         'home': (ctx) => HomeScreen(),
       },

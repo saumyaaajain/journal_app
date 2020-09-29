@@ -1,9 +1,4 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:messengerish/provider/FirebaseProvider.dart';
-import 'package:rxdart/rxdart.dart';
 
 class CRUD{
   FirebaseProvider fp = new FirebaseProvider();
