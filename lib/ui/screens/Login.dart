@@ -1,86 +1,192 @@
 import 'package:flutter/material.dart';
+import 'package:messengerish/ui/widgets/PrimaryButton.dart';
+import 'package:messengerish/helper/Auth.dart';
 
 class LoginPage extends StatefulWidget {
-  static String tag = 'login-page';
+  LoginPage({Key key, this.title, this.auth, this.onSignIn, this.setUid}) : super(key: key);
+
+  final String title;
+  final BaseAuth auth;
+  final VoidCallback onSignIn;
+  final Function(String) setUid;
+
   @override
   _LoginPageState createState() => new _LoginPageState();
 }
 
+enum FormType {
+  login,
+  register
+}
+
 class _LoginPageState extends State<LoginPage> {
+
+  static final formKey = new GlobalKey<FormState>();
+
+  String _email;
+  String _password;
+  FormType _formType = FormType.login;
+  String _authHint = '';
+  String uid ="";
+
+  bool validateAndSave() {
+    final form = formKey.currentState;
+    if (form.validate()) {
+      form.save();
+      return true;
+    }
+    return false;
+  }
+
+  void validateAndSubmit() async {
+    if (validateAndSave()) {
+      try {
+        print('calling'+_email+_password);
+        String userId = _formType == FormType.login
+            ? await widget.auth.signIn(_email, _password)
+            : await widget.auth.createUser(_email, _password);
+        setState(() {
+          uid = userId;
+          _authHint = 'Signed In\n\nUser id: $userId';
+        });
+        widget.setUid(userId);
+        widget.onSignIn();
+      }
+      catch (e) {
+        print("ERRORRRR");
+        setState(() {
+          _authHint = 'Sign In Error\n\n${e.toString()}';
+        });
+        print(e);
+      }
+    } else {
+      setState(() {
+        _authHint = '';
+      });
+    }
+  }
+
+  void moveToRegister() {
+    formKey.currentState.reset();
+    setState(() {
+      _formType = FormType.register;
+      _authHint = '';
+    });
+  }
+
+  void moveToLogin() {
+    formKey.currentState.reset();
+    setState(() {
+      _formType = FormType.login;
+      _authHint = '';
+    });
+  }
+
+  List<Widget> usernameAndPassword() {
+    return [
+      padded(child: new TextFormField(
+        key: new Key('email'),
+        decoration: new InputDecoration(labelText: 'Email'),
+        autocorrect: false,
+        validator: (val) => val.isEmpty ? 'Email can\'t be empty.' : null,
+        onSaved: (val) => _email = val,
+      )),
+      padded(child: new TextFormField(
+        key: new Key('password'),
+        decoration: new InputDecoration(labelText: 'Password'),
+        obscureText: true,
+        autocorrect: false,
+        validator: (val) => val.isEmpty ? 'Password can\'t be empty.' : null,
+        onSaved: (val) => _password = val,
+      )),
+    ];
+  }
+
+  List<Widget> submitWidgets() {
+    switch (_formType) {
+      case FormType.login:
+        return [
+          new PrimaryButton(
+              key: new Key('login'),
+              text: 'Login',
+              height: 44.0,
+              onPressed: validateAndSubmit
+          ),
+          new FlatButton(
+              key: new Key('need-account'),
+              child: new Text("Need an account? Register"),
+              onPressed: moveToRegister
+          ),
+        ];
+      case FormType.register:
+        return [
+          new PrimaryButton(
+              key: new Key('register'),
+              text: 'Create an account',
+              height: 44.0,
+              onPressed: validateAndSubmit
+          ),
+          new FlatButton(
+              key: new Key('need-login'),
+              child: new Text("Have an account? Login"),
+              onPressed: moveToLogin
+          ),
+        ];
+    }
+    return null;
+  }
+
+  Widget hintText() {
+    return new Container(
+      //height: 80.0,
+        padding: const EdgeInsets.all(32.0),
+        child: new Text(
+            _authHint,
+            key: new Key('hint'),
+            style: new TextStyle(fontSize: 18.0, color: Colors.grey),
+            textAlign: TextAlign.center)
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    final logo = Hero(
-      tag: 'hero',
-      child: CircleAvatar(
-        backgroundColor: Colors.transparent,
-        radius: 48.0,
-        child: Image.asset('assets/splash_page.png'),
-      ),
-    );
-
-    final email = TextFormField(
-      keyboardType: TextInputType.emailAddress,
-      autofocus: false,
-      initialValue: 'alucard@gmail.com',
-      decoration: InputDecoration(
-        hintText: 'Email',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final password = TextFormField(
-      autofocus: false,
-      initialValue: 'some password',
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
-
-    final loginButton = Padding(
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
+    return new Scaffold(
+        appBar: new AppBar(
+          title: new Text("Login"),
         ),
-        onPressed: () {
-          Navigator.of(context).pushNamed('chat');
-        },
-        padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
-        child: Text('Log In', style: TextStyle(color: Colors.white)),
-      ),
+        backgroundColor: Colors.grey[300],
+        body: new SingleChildScrollView(child: new Container(
+            padding: const EdgeInsets.all(16.0),
+            child: new Column(
+                children: [
+                  new Card(
+                      child: new Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            new Container(
+                                padding: const EdgeInsets.all(16.0),
+                                child: new Form(
+                                    key: formKey,
+                                    child: new Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: usernameAndPassword() + submitWidgets(),
+                                    )
+                                )
+                            ),
+                          ])
+                  ),
+                  hintText()
+                ]
+            )
+        ))
     );
+  }
 
-    final forgotLabel = FlatButton(
-      child: Text(
-        'Forgot password?',
-        style: TextStyle(color: Colors.black54),
-      ),
-      onPressed: () {},
-    );
-
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 24.0),
-            loginButton,
-            forgotLabel
-          ],
-        ),
-      ),
+  Widget padded({Widget child}) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: child,
     );
   }
 }

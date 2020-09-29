@@ -15,10 +15,10 @@ class ObservationBloc {
 
   BehaviorSubject<bool> showIndicatorController;
 
-  ObservationBloc() {
+  ObservationBloc(String path) {
     observationController = BehaviorSubject<List<DocumentSnapshot>>();
     showIndicatorController = BehaviorSubject<bool>();
-    firebaseProvider = FirebaseProvider();
+    firebaseProvider = FirebaseProvider(path);
   }
 
   Stream get getShowIndicatorStream => showIndicatorController.stream;

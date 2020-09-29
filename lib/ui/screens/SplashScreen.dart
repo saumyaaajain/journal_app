@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:messengerish/controller/Message.dart';
-
+import 'package:messengerish/helper/Auth.dart';
+import 'package:messengerish/ui/screens/RootPage.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -15,30 +15,19 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     startTime();
-//    getData();
   }
+
 
   startTime() async {
     var _duration = new Duration(seconds: 2);
-    return new Timer(_duration, () => navigationPage('chat'));
+    return new Timer(_duration, () => navigationPage());
   }
 
-
-  void getData(){
-//    List<MessageModel.Message> msg = [];
-    Message().getData().then((value) => {
-//      print(value.documents.length),
-//      value.documents.forEach((doc) => msg.add(MessageModel.Message(doc.data))),
-//      print(msg),
-      navigationPage('chat'),
-    }).catchError((e) => {
-      print(e),
-      navigationPage('home')
-    });
-  }
-
-  void navigationPage(String page) {
-    Navigator.of(context).pushReplacementNamed(page);
+  void navigationPage() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => RootPage(auth: new Auth(),)),
+    );
   }
 
   @override

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messengerish/global.dart';
+import 'package:messengerish/helper/Auth.dart';
 import 'package:messengerish/ui/widgets/widgets.dart';
 import 'package:messengerish/ui/widgets/searchwidget.dart';
 import 'package:messengerish/bloc/ObservationBloc.dart';
@@ -11,6 +12,10 @@ import 'package:messengerish/helper/Crud.dart';
 import 'package:messengerish/helper/Helper.dart';
 
 class ChatScreen extends StatefulWidget {
+  ChatScreen({this.uid, this.auth, this.onSignOut});
+  String uid;
+  final BaseAuth auth;
+  final VoidCallback onSignOut;
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -28,12 +33,23 @@ class _ChatScreenState extends State<ChatScreen> {
   ObservationBloc observationBloc;
   ScrollController controller = ScrollController();
 
+  void _signOut() async {
+    try {
+      await widget.auth.signOut();
+      widget.onSignOut();
+    } catch (e) {
+      print(e);
+    }
+
+  }
+
   @override
   void initState() {
     super.initState();
-    observationBloc= ObservationBloc();
+    observationBloc= ObservationBloc(widget.uid);
     observationBloc.fetchFirstList();
     controller.addListener(_scrollListener);
+    print(widget.uid);
 //    futureData = fetchData();
   }
 
@@ -70,7 +86,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     });
-    CRUD().addObservation(_title.text, _observation.text, _currentSliderValue, isBold, isItalic);
+    CRUD(widget.uid).addObservation(_title.text, _observation.text, _currentSliderValue, isBold, isItalic);
     msg.clear();
     _title.clear();
     _observation.clear();
@@ -79,6 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
       isItalic = false;
       _currentSliderValue = 40;
     });
+    _scrollListener();
   }
 
   Widget bodyContent(dynamic messages){
@@ -86,6 +103,10 @@ class _ChatScreenState extends State<ChatScreen> {
     return Padding(
       padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
       child: ListTile(
+        onLongPress: (){
+          CRUD(widget.uid).deleteObservation(messages.documentID);
+          observationBloc.fetchFirstList();
+          },
 //                        leading: Icon(Icons.assignment),
         title: Text(
           messages['title'] != null ? messages['title'] : "Title",
@@ -287,8 +308,17 @@ class _ChatScreenState extends State<ChatScreen> {
       body: StreamBuilder<List<DocumentSnapshot>>(
         stream: observationBloc.observationStream,
         builder: (context, snapshot){
-          if(snapshot.hasData){
-            print(snapshot.data[snapshot.data.length-1]);
+          if(snapshot.connectionState != ConnectionState.waiting){
+            if(!snapshot.hasData){
+              return Center(
+                child: Card(
+                  child: ListTile(
+                    leading: Icon(Icons.clear),
+                    title: Text("No Observations found"),
+                  ),
+                ),
+              );
+            }
             return ListView.builder(
                 itemCount: snapshot.data.length,
                 shrinkWrap: true,

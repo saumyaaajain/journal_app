@@ -154,6 +154,12 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
                                 .where((msg) => check(msg['title'] == null ? "" : msg['title'].toLowerCase(), msg['message'].toLowerCase(), query.toLowerCase()))
 //                                .where((msg) => msg['title'].contains(query))
                                 .toList();
+    if(suggestions.isEmpty){
+      return ListTile(
+        leading: Icon(Icons.close),
+        title: Text("No item found"),
+      );
+    }
     return ListView.builder(
       itemCount: suggestions.length,
         itemBuilder: (context, i){

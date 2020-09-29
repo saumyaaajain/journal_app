@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirebaseProvider {
-  CollectionReference db = Firestore.instance.collection('journal');
+  CollectionReference db;
+
+  FirebaseProvider(String path){
+    print(path);
+    db = Firestore.instance.collection(path);
+  }
 
   Future<List<DocumentSnapshot>> fetchFirstList() async {
     return (await db
@@ -33,5 +38,9 @@ class FirebaseProvider {
         'isItalic' : isItalic,
       }
     });
+  }
+
+  Future<void> deleteObservation(String id){
+    return db.document(id).delete();
   }
 }
