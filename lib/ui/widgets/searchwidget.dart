@@ -1,39 +1,21 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:messengerish/global.dart';
 import 'package:messengerish/ui/widgets/widgets.dart';
 
 class Search extends SearchDelegate<Map<String, dynamic>>{
+  List<DocumentSnapshot> mes;
+  List<DocumentSnapshot> recent = [];
 
-  Search(String m){
-    print(m);
-  }
-
-  List<Map<String, dynamic>> recent = [
-    {
-    'status' : MessageType.received,
-    'contactImgUrl' : 'https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_960_720.jpg',
-    'contactName' : 'Client',
-    'message' : 'Hi mate, I\d like to hire you to create a mobile app for my business' ,
-    'time' : '08:43 AM',
-    'style' : {
-        'size' : 16.0,
-        'isBold' : false,
-        'isItalic' : false,
-        }
-    },
-  ];
-
-  Map<String, dynamic> result;
+  DocumentSnapshot result;
   String title = "Title";
   String observations = "Observation";
-  void setSuggestions(Map<String, dynamic> res){
-    result = res;
-  }
 
-  Map<String, dynamic> getSggestions(){
-    return result;
+  Search(dynamic m){
+    mes = m;
+    print(mes[0].documentID);
   }
 
   List<TextSpan> highlightOccurrences(String source, String query) {
@@ -91,6 +73,23 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
       return true;
     }
     return false;
+  }
+
+  String getTime(Timestamp t){
+    DateTime time = DateTime.parse(t.toDate().toString());
+    String timeStr;
+    if(time.hour > 12){
+      String hours = (time.hour-12).toString();
+      String mins = time.minute.toString();
+      timeStr = hours+":"+mins+" PM";
+    } else if(time.hour == 12){
+      timeStr = "12:"+time.minute.toString()+" PM";
+    }else if(time.hour == 0){
+      timeStr = "12:"+time.minute.toString()+" AM";
+    } else{
+      timeStr = time.hour.toString()+":"+time.minute.toString()+" AM";
+    }
+    return timeStr;
   }
 
   Widget Observation(){
@@ -175,9 +174,9 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestions = query.isEmpty ?
+    final List<DocumentSnapshot> suggestions = query.isEmpty ?
                             recent :
-                            messages
+                            mes
                                 .where((msg) => check(msg['title'] == null ? "" : msg['title'].toLowerCase(), msg['message'].toLowerCase(), query.toLowerCase()))
 //                                .where((msg) => msg['title'].contains(query))
                                 .toList();
@@ -207,7 +206,7 @@ class Search extends SearchDelegate<Map<String, dynamic>>{
                     children: highlightOccurrences(suggestions[i]['message'] , query),
                   ),
                 ),
-                trailing: Text(suggestions[i]['time'] == null ? "WHY??": suggestions[i]['time']),
+                trailing: Text(suggestions[i]['time'] == null ? "WHY??": getTime(suggestions[i]['time'])),
               );
             },
           );

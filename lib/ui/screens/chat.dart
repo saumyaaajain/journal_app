@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:messengerish/global.dart';
 import 'package:messengerish/ui/widgets/widgets.dart';
 import 'package:messengerish/ui/widgets/searchwidget.dart';
+import 'package:messengerish/bloc/ObservationBloc.dart';
 import 'package:messengerish/model/Message.dart';
+import 'package:messengerish/helper/Crud.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -24,10 +26,15 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<List<DocumentSnapshot>> futureData;
   int pageNo = 1;
   DocumentSnapshot lastVisible;
+  ObservationBloc observationBloc;
+  ScrollController controller = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    observationBloc= ObservationBloc();
+    observationBloc.fetchFirstList();
+    controller.addListener(_scrollListener);
 //    futureData = fetchData();
   }
 
@@ -39,6 +46,14 @@ class _ChatScreenState extends State<ChatScreen> {
 //    return db;
 //  }
 
+  void _scrollListener() {
+    if (controller.offset >= controller.position.maxScrollExtent &&
+        !controller.position.outOfRange) {
+      print("at the end of list");
+      observationBloc.fetchNextMovies();
+    }
+  }
+
   void sendMsg(){
     if(_title.text.length <= 0 || _observation.text.length <= 0){
       return;
@@ -46,12 +61,9 @@ class _ChatScreenState extends State<ChatScreen> {
     print("reaching");
     setState(() {
       messages.add({
-        'status' : MessageType.received,
-        'contactImgUrl' : 'https://cdn.pixabay.com/photo/2015/01/08/18/29/entrepreneur-593358_960_720.jpg',
-        'contactName' : 'Client',
         'title' : _title.text,
         'message' : _observation.text,
-        'time' : '08:49 AM',
+        'time' : DateTime.now(),
         'style' : {
           'size' : _currentSliderValue,
           'isBold' : isBold,
@@ -59,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     });
-//    addUser();
+    CRUD().addObservation(_title.text, _observation.text, _currentSliderValue, isBold, isItalic);
     msg.clear();
     _title.clear();
     _observation.clear();
@@ -71,6 +83,19 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget bodyContent(dynamic messages){
+    DateTime time = DateTime.parse(messages['time'].toDate().toString());
+    String timeStr;
+    if(time.hour > 12){
+      String hours = (time.hour-12).toString();
+      String mins = time.minute.toString();
+      timeStr = hours+":"+mins+" PM";
+    } else if(time.hour == 12){
+      timeStr = "12:"+time.minute.toString()+" PM";
+    }else if(time.hour == 0){
+      timeStr = "12:"+time.minute.toString()+" AM";
+    } else{
+      timeStr = time.hour.toString()+":"+time.minute.toString()+" AM";
+    }
     return Padding(
       padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
       child: ListTile(
@@ -98,9 +123,9 @@ class _ChatScreenState extends State<ChatScreen> {
 //                              color: Colors.white,
             ),
             Text(
-              messages['time'],
+              timeStr,
               style: TextStyle(
-//                                fontSize: messages[i]['size'] == null ? 20 : messages[i]['size'],
+//                fontSize: messages['size'] == null ? 20 : messages['size'],
               ),
             ),
           ],
@@ -267,7 +292,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              showSearch(context: context, delegate: Search("hello"));
+              showSearch(context: context, delegate: Search(observationBloc.documentList));
             },
           ),
         ],
@@ -278,23 +303,20 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Column(
               children: <Widget>[
                 Expanded(
-                  child: StreamBuilder(
-                    stream: pageNo == 1 ? db.limit(1).snapshots() : db.startAfterDocument(lastVisible).limit(1).snapshots(),
+                  child: StreamBuilder<List<DocumentSnapshot>>(
+                    stream: observationBloc.observationStream,
                     builder: (context, snapshot){
                       if(snapshot.hasData){
-                            () async {
-                              setState(() {
-                              lastVisible = snapshot.data.documents[snapshot.data.documents.length-1];
-                              });
-                            }();
-                        print(snapshot.data.documents[snapshot.data.documents.length-1]);
+                        print(snapshot.data[snapshot.data.length-1]);
                         return ListView.builder(
-                          itemCount: snapshot.data.documents.length,
+                          itemCount: snapshot.data.length,
+                            shrinkWrap: true,
+                            controller: controller,
                             itemBuilder: (context, i){
-                              return bodyContent(snapshot.data.documents[i]);
+                              return bodyContent(snapshot.data[i]);
                         });
                       }
-                      return Text("Loading");
+                      return CircularProgressIndicator();
                     },
                   ),
                 ),
@@ -385,6 +407,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         onPressed: (){
                           setState(() {
                             pageNo += 1;
+                            observationBloc.fetchNextMovies();
                           });
                         },
                       ),
