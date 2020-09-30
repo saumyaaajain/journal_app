@@ -43,4 +43,11 @@ class FirebaseProvider {
   Future<void> deleteObservation(String id){
     return db.document(id).delete();
   }
+
+  Future<void> addExperiment(String title){
+    return db.add({
+      'title' : title,
+      'time': DateTime.now(),
+    });
+  }
 }

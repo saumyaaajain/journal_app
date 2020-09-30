@@ -1,21 +1,17 @@
-//import 'dart:html';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:messengerish/global.dart';
-import 'package:messengerish/helper/Auth.dart';
-import 'package:messengerish/ui/widgets/widgets.dart';
 import 'package:messengerish/ui/widgets/searchwidget.dart';
 import 'package:messengerish/bloc/ObservationBloc.dart';
 import 'package:messengerish/helper/Crud.dart';
 import 'package:messengerish/helper/Helper.dart';
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({this.uid, this.auth, this.onSignOut});
+  ChatScreen({this.title, this.uid});
+  String title;
   String uid;
-  final BaseAuth auth;
-  final VoidCallback onSignOut;
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
@@ -33,23 +29,13 @@ class _ChatScreenState extends State<ChatScreen> {
   ObservationBloc observationBloc;
   ScrollController controller = ScrollController();
 
-  void _signOut() async {
-    try {
-      await widget.auth.signOut();
-      widget.onSignOut();
-    } catch (e) {
-      print(e);
-    }
-
-  }
-
   @override
   void initState() {
     super.initState();
-    observationBloc= ObservationBloc(widget.uid);
+    observationBloc= ObservationBloc("users/${widget.uid}/experiments/${widget.title}/listOfExperiments");
     observationBloc.fetchFirstList();
     controller.addListener(_scrollListener);
-    print(widget.uid);
+    print(widget.title);
 //    futureData = fetchData();
   }
 
@@ -86,7 +72,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
       });
     });
-    CRUD(widget.uid).addObservation(_title.text, _observation.text, _currentSliderValue, isBold, isItalic);
+    CRUD("users/${widget.uid}/experiments/${widget.title}/listOfExperiments").addObservation(_title.text, _observation.text, _currentSliderValue, isBold, isItalic);
     msg.clear();
     _title.clear();
     _observation.clear();
@@ -104,7 +90,7 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: EdgeInsets.only(top: 7, bottom: 7, left: 0, right: 0),
       child: ListTile(
         onLongPress: (){
-          CRUD(widget.uid).deleteObservation(messages.documentID);
+          CRUD("users/${widget.uid}/experiments/${widget.title}/listOfExperiments").deleteObservation(messages.documentID);
           observationBloc.fetchFirstList();
           },
 //                        leading: Icon(Icons.assignment),
@@ -152,9 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            MyCircleAvatar(
-              imgUrl: friendsList[0]['imgUrl'],
-            ),
+            Icon(Icons.assignment),
             SizedBox(width: 15),
             Text(
               "My Experiment-1",
@@ -199,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       "Add an observation",
                                       style: TextStyle(
                                         color: Colors.blue,
-                                          fontSize: 35
+                                          fontSize: 27
                                       ),
                                     ),
                                   ],
@@ -239,7 +223,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: <Widget>[
                                   SizedBox(
-                                    width: 250,
+                                    width: 220,
                                     child: Slider(
                                       value: _currentSliderValue,
                                       min: 20,

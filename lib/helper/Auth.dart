@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 abstract class BaseAuth {
 
@@ -10,27 +10,46 @@ abstract class BaseAuth {
 }
 
 class Auth implements BaseAuth {
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  String id;
 
   Future<String> signIn(String email, String password) async {
-    FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password)).user;
-    return user.uid;
+    List<DocumentSnapshot> documentList;
+    documentList = (await Firestore.instance
+        .collection("auth")
+        .where('email', isEqualTo: email)
+        .where('password', isEqualTo: password)
+        .getDocuments())
+        .documents;
+    id = documentList[0].documentID;
+//    FirebaseUser user = (await _firebaseAuth.signInWithEmailAndPassword(email: email, password: password)).user;
+    return id;
   }
 
   Future<String> createUser(String email, String password) async {
     print("create user");
     print(email+" "+password);
-    FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password)).user;
-    return user.uid;
+    DocumentReference docRef = await Firestore.instance.collection('auth')
+        .add({'email': email, 'password': password})
+        .then((docRef) => docRef).catchError((e) => e);
+    id = docRef.documentID;
+    await Firestore.instance.collection('users/$id/experiments').add({
+      'title': 'MyFirstExperiment',
+      'time' : DateTime.now(),
+    });
+//    FirebaseUser user = (await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password)).user;
+    return id;
   }
 
   Future<String> currentUser() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    return user != null ? user.uid : null;
+//    FirebaseUser user = await _firebaseAuth.currentUser();
+//    return user != null ? user.uid : null;
+      return id;
   }
 
   Future<void> signOut() async {
-    return _firebaseAuth.signOut();
+    id = "";
+//    return _firebaseAuth.signOut();
+    return id;
   }
 
 }

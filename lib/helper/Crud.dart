@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:messengerish/provider/FirebaseProvider.dart';
 
 class CRUD{
@@ -9,9 +11,7 @@ class CRUD{
 
   addObservation(String title, String observation, double size, bool isBold, bool isItalic){
     fp.addObservation(title, observation, size, isBold, isItalic)
-        .then((value) => {
-          print("User Added"),
-        })
+        .then((value) => print("successful"))
         .catchError((error) => print("Failed to add user: $error"));
   }
 
@@ -19,5 +19,11 @@ class CRUD{
     fp.deleteObservation(id)
         .then((e) => print("Sucessfull"))
         .catchError((e) => print(e.toString()));
+  }
+
+  addExperiment(String title){
+    fp.addExperiment(title)
+        .then((e) => print("successfull"))
+        .catchError((e) => print(e));
   }
 }

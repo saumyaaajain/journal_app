@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:messengerish/helper/Auth.dart';
 import 'package:messengerish/ui/screens/Login.dart';
-import 'package:messengerish/ui/screens/chat.dart';
 import 'package:messengerish/ui/screens/home.dart';
 
 class RootPage extends StatefulWidget {
@@ -56,7 +55,7 @@ class _RootPageState extends State<RootPage> {
           onSignIn: () => _updateAuthStatus(AuthStatus.signedIn),
         );
       case AuthStatus.signedIn:
-        return new ChatScreen(
+        return new HomeScreen(
             auth: widget.auth,
             uid: uid,
             onSignOut: () => _updateAuthStatus(AuthStatus.notSignedIn)

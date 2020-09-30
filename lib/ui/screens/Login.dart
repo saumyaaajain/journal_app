@@ -54,9 +54,15 @@ class _LoginPageState extends State<LoginPage> {
       }
       catch (e) {
         print("ERRORRRR");
-        setState(() {
-          _authHint = 'Sign In Error\n\n${e.toString()}';
-        });
+        if(e.toString().startsWith('RangeError')){
+          setState(() {
+            _authHint = 'Sign In Error\n\nNo user found';
+          });
+        } else{
+          setState(() {
+            _authHint = 'Sign In Error\n\n${e.toString()}';
+          });
+        }
         print(e);
       }
     } else {
