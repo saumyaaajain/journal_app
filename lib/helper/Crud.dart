@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:messengerish/provider/FirebaseProvider.dart';
+import 'package:test_app/provider/FirebaseProvider.dart';
 
 class CRUD{
   FirebaseProvider fp;
@@ -15,10 +15,10 @@ class CRUD{
         .catchError((error) => print("Failed to add user: $error"));
   }
 
-  deleteObservation(String id){
-    fp.deleteObservation(id)
-        .then((e) => print("Sucessfull"))
-        .catchError((e) => print(e.toString()));
+  Future<bool> deleteObservation(String id){
+    return fp.deleteObservation(id)
+        .then((e) => true)
+        .catchError((e) => false);
   }
 
   addExperiment(String title){

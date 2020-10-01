@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/helper/Auth.dart';
-import 'package:messengerish/ui/screens/Login.dart';
-import 'package:messengerish/ui/screens/home.dart';
+import 'package:test_app/helper/Auth.dart';
+import 'package:test_app/ui/screens/Login.dart';
+import 'package:test_app/ui/screens/home.dart';
 
 class RootPage extends StatefulWidget {
   RootPage({Key key, this.auth}) : super(key: key);

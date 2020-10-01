@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:messengerish/provider/FirebaseProvider.dart';
+import 'package:test_app/provider/FirebaseProvider.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ObservationBloc {

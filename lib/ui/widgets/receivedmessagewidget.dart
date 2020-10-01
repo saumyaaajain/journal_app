@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/global.dart';
+import 'package:test_app/global.dart';
 
 import 'mycircleavatar.dart';
 class ReceivedMessagesWidget extends StatelessWidget {

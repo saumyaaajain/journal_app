@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:messengerish/helper/Helper.dart';
+import 'package:test_app/helper/Helper.dart';
 
 class Search extends SearchDelegate<Map<String, dynamic>>{
   List<DocumentSnapshot> mes;

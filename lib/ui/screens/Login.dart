@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/ui/widgets/PrimaryButton.dart';
-import 'package:messengerish/helper/Auth.dart';
+import 'package:test_app/ui/widgets/PrimaryButton.dart';
+import 'package:test_app/helper/Auth.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key, this.title, this.auth, this.onSignIn, this.setUid}) : super(key: key);

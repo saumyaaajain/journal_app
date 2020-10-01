@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/global.dart';
+import 'package:test_app/global.dart';
 
 class SentMessageWidget extends StatelessWidget {
   final int i;

@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:messengerish/global.dart';
-import 'package:messengerish/ui/widgets/searchwidget.dart';
-import 'package:messengerish/bloc/ObservationBloc.dart';
-import 'package:messengerish/helper/Crud.dart';
-import 'package:messengerish/helper/Helper.dart';
+import 'package:test_app/global.dart';
+import 'package:test_app/ui/widgets/searchwidget.dart';
+import 'package:test_app/bloc/ObservationBloc.dart';
+import 'package:test_app/helper/Crud.dart';
+import 'package:test_app/helper/Helper.dart';
 
 class ChatScreen extends StatefulWidget {
   ChatScreen({this.title, this.uid});
@@ -141,7 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Icon(Icons.assignment),
             SizedBox(width: 15),
             Text(
-              "My Experiment-1",
+              widget.title == null ? "Experiment" : widget.title,
               style: Theme.of(context).textTheme.subhead,
               overflow: TextOverflow.clip,
             ),

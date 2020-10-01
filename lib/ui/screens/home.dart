@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/helper/Auth.dart';
+import 'package:test_app/helper/Auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:messengerish/helper/Helper.dart';
-import 'package:messengerish/helper/Crud.dart';
+import 'package:test_app/helper/Helper.dart';
+import 'package:test_app/helper/Crud.dart';
 
 import 'chat.dart';
 
@@ -26,11 +26,13 @@ class HomeScreen extends StatelessWidget {
     }
 
     void addData() async{
-      CRUD("users/$uid/experiments").addExperiment(experimentController.text);
+      String newExperiment = experimentController.text;
+      experimentController.clear();
+      CRUD("users/$uid/experiments").addExperiment(newExperiment);
     }
 
-    void deleteData(String id) async{
-      CRUD("users/$uid/experiments").deleteObservation(id);
+    Future<bool> deleteData(String id) async{
+      return CRUD("users/$uid/experiments").deleteObservation(id);
     }
 
     Widget Experiments(dynamic experiments){
@@ -46,8 +48,10 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   ListTile(
-                    onLongPress: () {
-                      deleteData(experiments[i].documentID);
+                    onLongPress: () async {
+                      await deleteData(experiments[i].documentID)
+                       ? Scaffold.of(context).showSnackBar(SnackBar(content: Text("Successful")))
+                       : Scaffold.of(context).showSnackBar(SnackBar(content: Text("Not Successful")));
                     },
                     onTap: () => Navigator.push(
                       context,

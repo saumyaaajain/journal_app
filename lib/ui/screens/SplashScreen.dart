@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:messengerish/helper/Auth.dart';
-import 'package:messengerish/ui/screens/RootPage.dart';
+import 'package:test_app/helper/Auth.dart';
+import 'package:test_app/ui/screens/RootPage.dart';
 
 class SplashScreen extends StatefulWidget {
   @override

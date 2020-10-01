@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:messengerish/ui/screens/Login.dart';
-import 'package:messengerish/ui/screens/SplashScreen.dart';
-import 'package:messengerish/ui/screens/screens.dart';
+import 'package:test_app/ui/screens/Login.dart';
+import 'package:test_app/ui/screens/SplashScreen.dart';
+import 'package:test_app/ui/screens/screens.dart';
 
 Future<void> main() {
   runApp(MyApp());
